@@ -84,6 +84,7 @@ public class BridgerMojo extends AbstractMojo {
             }
 
             bridger.transformRecursive(files);
+            log.info(String.format("Translated %d methods and %d method calls%n", bridger.getTransformedMethodCount(), bridger.getTransformedMethodCallCount()));
         }
     }
 

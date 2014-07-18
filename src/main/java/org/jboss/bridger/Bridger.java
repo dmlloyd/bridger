@@ -32,6 +32,7 @@ import java.io.RandomAccessFile;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -44,6 +45,8 @@ import org.objectweb.asm.Opcodes;
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
 public final class Bridger implements ClassFileTransformer {
+    private final AtomicInteger transformedMethodCount = new AtomicInteger();
+    private final AtomicInteger transformedMethodCallCount = new AtomicInteger();
 
     public Bridger() {
     }
@@ -54,7 +57,9 @@ public final class Bridger implements ClassFileTransformer {
      * @param args the file and directory names
      */
     public static void main(String[] args) {
-        new Bridger().transformRecursive(args);
+        final Bridger bridger = new Bridger();
+        bridger.transformRecursive(args);
+        System.out.printf("Translated %d methods and %d method calls%n", bridger.getTransformedMethodCount(), bridger.getTransformedMethodCallCount());
     }
 
     /**
@@ -104,6 +109,14 @@ public final class Bridger implements ClassFileTransformer {
         return classWriter.toByteArray();
     }
 
+    public int getTransformedMethodCount() {
+        return transformedMethodCount.get();
+    }
+
+    public int getTransformedMethodCallCount() {
+        return transformedMethodCallCount.get();
+    }
+
     private void doAccept(final ClassWriter classWriter, final ClassReader classReader) throws IllegalClassFormatException {
         try {
             classReader.accept(new TranslatingClassVisitor(classWriter), 0);
@@ -141,7 +154,7 @@ public final class Bridger implements ClassFileTransformer {
         } catch (Throwable ignored) {}
     }
 
-    private static class TranslatingClassVisitor extends ClassVisitor {
+    private class TranslatingClassVisitor extends ClassVisitor {
 
         public TranslatingClassVisitor(final ClassWriter classWriter) {
             super(Opcodes.ASM4, classWriter);
@@ -151,6 +164,7 @@ public final class Bridger implements ClassFileTransformer {
             final MethodVisitor defaultVisitor;
             final int idx = name.indexOf("$$bridge");
             if (idx != -1) {
+                transformedMethodCount.getAndIncrement();
                 defaultVisitor = super.visitMethod(access | Opcodes.ACC_BRIDGE | Opcodes.ACC_SYNTHETIC, name.substring(0, idx), desc, signature, exceptions);
             } else {
                 defaultVisitor = super.visitMethod(access, name, desc, signature, exceptions);
@@ -159,6 +173,7 @@ public final class Bridger implements ClassFileTransformer {
                 public void visitInvokeDynamicInsn(final String name, final String desc, final Handle bsm, final Object... bsmArgs) {
                     final int idx = name.indexOf("$$bridge");
                     if (idx != -1) {
+                        transformedMethodCallCount.getAndIncrement();
                         final String realName = name.substring(0, idx);
                         super.visitInvokeDynamicInsn(realName, desc, bsm, bsmArgs);
                     } else {
@@ -169,6 +184,7 @@ public final class Bridger implements ClassFileTransformer {
                 public void visitMethodInsn(final int opcode, final String owner, final String name, final String desc) {
                     final int idx = name.indexOf("$$bridge");
                     if (idx != -1) {
+                        transformedMethodCallCount.getAndIncrement();
                         final String realName = name.substring(0, idx);
                         super.visitMethodInsn(opcode, owner, realName, desc);
                     } else {
