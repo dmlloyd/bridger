@@ -28,7 +28,7 @@
 
     <groupId>org.jboss.bridger</groupId>
     <artifactId>bridger</artifactId>
-    <version>1.0.0.Beta1-SNAPSHOT</version>
+    <version>1.0.Final</version>
     <packaging>maven-plugin</packaging>
 
     <parent>
