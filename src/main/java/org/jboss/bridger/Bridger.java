@@ -87,8 +87,8 @@ public final class Bridger implements ClassFileTransformer {
             } else if (file.getName().endsWith(".class")) {
                 try {
                     transform(new RandomAccessFile(file, "rw"));
-                } catch (IllegalClassFormatException | IOException e) {
-                    System.err.println("Failed to transform " + file + ": " + e);
+                } catch (Exception e) {
+                    System.out.println("Failed to transform " + file + ": " + e);
                 }
             }
             // else ignore
