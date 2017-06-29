@@ -169,7 +169,7 @@ public final class Bridger implements ClassFileTransformer {
             } else {
                 defaultVisitor = super.visitMethod(access, name, desc, signature, exceptions);
             }
-            return new MethodVisitor(Opcodes.ASM4, defaultVisitor) {
+            return new MethodVisitor(Opcodes.ASM5, defaultVisitor) {
                 public void visitInvokeDynamicInsn(final String name, final String desc, final Handle bsm, final Object... bsmArgs) {
                     final int idx = name.indexOf("$$bridge");
                     if (idx != -1) {
