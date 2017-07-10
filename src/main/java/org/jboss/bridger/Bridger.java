@@ -181,14 +181,14 @@ public final class Bridger implements ClassFileTransformer {
                     }
                 }
 
-                public void visitMethodInsn(final int opcode, final String owner, final String name, final String desc) {
+                public void visitMethodInsn(final int opcode, final String owner, final String name, final String desc, final boolean itf) {
                     final int idx = name.indexOf("$$bridge");
                     if (idx != -1) {
                         transformedMethodCallCount.getAndIncrement();
                         final String realName = name.substring(0, idx);
-                        super.visitMethodInsn(opcode, owner, realName, desc);
+                        super.visitMethodInsn(opcode, owner, realName, desc, itf);
                     } else {
-                        super.visitMethodInsn(opcode, owner, name, desc);
+                        super.visitMethodInsn(opcode, owner, name, desc, itf);
                     }
                 }
             };
