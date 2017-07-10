@@ -16,7 +16,7 @@ Add a snippet like this to your pom.xml:
             <plugin>
                 <groupId>org.jboss.bridger</groupId>
                 <artifactId>bridger</artifactId>
-                <version>1.2.Final</version>
+                <version>1.3.Final</version>
                 <executions>
                     <!-- run after "compile", runs bridger on main classes -->
                     <execution>
