@@ -48,6 +48,6 @@ Usage: Command Line
 -------------------
 Execute like this:
 
-    java -classpath path/to/bridger.jar:path/to/asm-4.1.jar org.jboss.bridger.Bridger path/of/class/files/
+    java -classpath path/to/bridger.jar:path/to/asm-6.0.jar org.jboss.bridger.Bridger path/of/class/files/
 
 The class files will be transformed in place.

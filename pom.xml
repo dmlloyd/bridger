@@ -44,7 +44,7 @@
         <version.org.apache.maven.maven-settings>3.0.5</version.org.apache.maven.maven-settings>
         <version.org.apache.maven.plugin-api>3.0.5</version.org.apache.maven.plugin-api>
         <version.org.apache.maven.plugin-tools>3.2</version.org.apache.maven.plugin-tools>
-        <version.org.apache.maven.plugins.plugin>3.2</version.org.apache.maven.plugins.plugin>
+        <version.org.apache.maven.plugins.plugin>3.5.1</version.org.apache.maven.plugins.plugin>
         <version.org.apache.maven.plugins.site-plugin>3.2</version.org.apache.maven.plugins.site-plugin>
         <version.org.apache.maven.plugins.maven-dependency-plugin>2.6</version.org.apache.maven.plugins.maven-dependency-plugin>
         <version.org.apache.maven.shared.maven-filtering>1.1</version.org.apache.maven.shared.maven-filtering>
@@ -95,9 +95,16 @@
                 <configuration>
                     <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm</artifactId>
+                        <version>5.2</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
-                        <id>mojo-descriptor</id>
+                        <id>default-descriptor</id>
                         <goals>
                             <goal>descriptor</goal>
                         </goals>
@@ -121,7 +128,7 @@
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
-            <version>5.2</version>
+            <version>6.0</version>
         </dependency>
 
         <!-- maven plugin dependencies -->
