@@ -161,12 +161,16 @@ public final class Bridger implements ClassFileTransformer {
         }
 
         public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, final String[] exceptions) {
+            boolean removeExistingBridgeMethods = Boolean.parseBoolean(System.getProperty("jboss.bridger.remove_existing_bridge_methods", "false"));
+
             final MethodVisitor defaultVisitor;
             final int idx = name.indexOf("$$bridge");
             if (idx != -1) {
                 transformedMethodCount.getAndIncrement();
                 defaultVisitor = super.visitMethod(access | Opcodes.ACC_BRIDGE | Opcodes.ACC_SYNTHETIC, name.substring(0, idx), desc, signature, exceptions);
             } else {
+                if (removeExistingBridgeMethods && (access & Opcodes.ACC_BRIDGE) != 0)
+                    return null;
                 defaultVisitor = super.visitMethod(access, name, desc, signature, exceptions);
             }
             return new MethodVisitor(Opcodes.ASM5, defaultVisitor) {
