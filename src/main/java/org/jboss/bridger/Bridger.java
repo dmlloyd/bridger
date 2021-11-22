@@ -157,7 +157,7 @@ public final class Bridger implements ClassFileTransformer {
     private class TranslatingClassVisitor extends ClassVisitor {
 
         public TranslatingClassVisitor(final ClassWriter classWriter) {
-            super(Opcodes.ASM4, classWriter);
+            super(Opcodes.ASM9, classWriter);
         }
 
         public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, final String[] exceptions) {
@@ -173,7 +173,7 @@ public final class Bridger implements ClassFileTransformer {
                     return null;
                 defaultVisitor = super.visitMethod(access, name, desc, signature, exceptions);
             }
-            return new MethodVisitor(Opcodes.ASM5, defaultVisitor) {
+            return new MethodVisitor(Opcodes.ASM9, defaultVisitor) {
                 public void visitInvokeDynamicInsn(final String name, final String desc, final Handle bsm, final Object... bsmArgs) {
                     final int idx = name.indexOf("$$bridge");
                     if (idx != -1) {
