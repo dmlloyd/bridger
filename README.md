@@ -7,6 +7,8 @@ Usage: Source code
 ------------------
 In your Java source, create your bridge methods with `$$bridge` in the name.  Everything before the `$$bridge` is retained, everything including and after it is discarded.  The methods will additionally be tagged as `ACC_BRIDGE` and `ACC_SYNTHETIC`.
 
+If you add the `@hidden` tag (available since Java 9) to the method's JavaDoc comment, it will not show up in rendered documentation for the class.
+
 Usage: Maven
 ------------
 Add a snippet like this to your pom.xml:
