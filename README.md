@@ -52,4 +52,12 @@ Execute like this:
 
     java -classpath path/to/bridger.jar:path/to/asm-6.0.jar org.jboss.bridger.Bridger path/of/class/files/
 
+You can also perform single method transforms on any given method like this:
+
+    java -classpath path/to/bridger.jar:path/to/asm-6.0.jar org.jboss.bridger.Bridger --single-transform path/to/class/file.class methodName [methodDescriptor]
+
+Using this mechanism, the method does not need to have $$bridge in the name. This bridges all overloads of the method with this name, unless the descriptor is provided.
+Note that this uses JVM method descriptor notation, so a method such as `void method(String s, int i)` would
+have the descriptor `(Ljava/lang/String;I)V`. This can be obtained by for instance using `javap -s` on the class file.
+
 The class files will be transformed in place.

@@ -58,7 +58,20 @@ public final class Bridger implements ClassFileTransformer {
      */
     public static void main(String[] args) {
         final Bridger bridger = new Bridger();
-        bridger.transformRecursive(args);
+        if(args.length > 0 && "--single-transform".equals(args[0])) {
+            if(args.length != 3 && args.length != 4) {
+                System.err.println("Usage: --single-transform path/of/class/file deprecatedMethodName [methodDescriptor]");
+                return;
+            }
+            File classFile = new File(args[1]);
+            if(!classFile.exists()) {
+                System.err.println("Class file does not exist.");
+                return;
+            }
+            bridger.transformSingle(classFile, args[2], args.length >= 4 ? args[3] : null);
+        } else {
+            bridger.transformRecursive(args);
+        }
         System.out.printf("Translated %d methods and %d method calls%n", bridger.getTransformedMethodCount(), bridger.getTransformedMethodCallCount());
     }
 
@@ -95,6 +108,14 @@ public final class Bridger implements ClassFileTransformer {
         }
     }
 
+    public void transformSingle(File classFile, String methodName, String methodDescriptor) {
+        try {
+            transformSingle(new RandomAccessFile(classFile, "rw"), methodName, methodDescriptor);
+        } catch (Exception e) {
+            System.out.println("Failed to transform " + classFile + ": " + e);
+        }
+    }
+
     public byte[] transform(final ClassLoader loader, final String className, final Class<?> classBeingRedefined, final ProtectionDomain protectionDomain, final byte[] classfileBuffer) throws IllegalClassFormatException {
         ClassWriter classWriter = new ClassWriter(0);
         final ClassReader classReader = new ClassReader(classfileBuffer);
@@ -106,6 +127,14 @@ public final class Bridger implements ClassFileTransformer {
         ClassWriter classWriter = new ClassWriter(0);
         final ClassReader classReader = new ClassReader(input);
         doAccept(classWriter, classReader);
+        return classWriter.toByteArray();
+    }
+
+    public byte[] transformSingle(final InputStream input, String methodName, String methodDescriptor)
+            throws IllegalClassFormatException, IOException {
+        ClassWriter classWriter = new ClassWriter(0);
+        final ClassReader classReader = new ClassReader(input);
+        doAcceptSingle(classWriter, classReader, methodName, methodDescriptor);
         return classWriter.toByteArray();
     }
 
@@ -129,6 +158,19 @@ public final class Bridger implements ClassFileTransformer {
         }
     }
 
+     private void doAcceptSingle(final ClassWriter classWriter, final ClassReader classReader, String methodName,
+             String methodDescriptor) throws IllegalClassFormatException {
+        try {
+            classReader.accept(new TranslatingSingleMethodClassVisitor(classWriter, methodName, methodDescriptor), 0);
+        } catch (RuntimeException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof IllegalClassFormatException) {
+                throw (IllegalClassFormatException) cause;
+            }
+            throw e;
+        }
+    }
+
     public void transform(final InputStream input, final OutputStream output) throws IllegalClassFormatException, IOException {
         output.write(transform(input));
     }
@@ -138,6 +180,22 @@ public final class Bridger implements ClassFileTransformer {
             file.seek(0);
             try (InputStream is = new FileInputStream(file.getFD())) {
                 final byte[] bytes = transform(is);
+                file.seek(0);
+                file.write(bytes);
+                file.setLength(bytes.length);
+            }
+            file.close();
+        } finally {
+            safeClose(file);
+        }
+    }
+
+    public void transformSingle(final RandomAccessFile file, String methodName, String methodDescriptor)
+            throws IllegalClassFormatException, IOException {
+        try {
+            file.seek(0);
+            try (InputStream is = new FileInputStream(file.getFD())) {
+                final byte[] bytes = transformSingle(is, methodName, methodDescriptor);
                 file.seek(0);
                 file.write(bytes);
                 file.setLength(bytes.length);
@@ -169,8 +227,9 @@ public final class Bridger implements ClassFileTransformer {
                 transformedMethodCount.getAndIncrement();
                 defaultVisitor = super.visitMethod(access | Opcodes.ACC_BRIDGE | Opcodes.ACC_SYNTHETIC, name.substring(0, idx), desc, signature, exceptions);
             } else {
-                if (removeExistingBridgeMethods && (access & Opcodes.ACC_BRIDGE) != 0)
+                if (removeExistingBridgeMethods && (access & Opcodes.ACC_BRIDGE) != 0) {
                     return null;
+                }
                 defaultVisitor = super.visitMethod(access, name, desc, signature, exceptions);
             }
             return new MethodVisitor(Opcodes.ASM9, defaultVisitor) {
@@ -194,6 +253,51 @@ public final class Bridger implements ClassFileTransformer {
                     } else {
                         super.visitMethodInsn(opcode, owner, name, desc, itf);
                     }
+                }
+            };
+        }
+    }
+
+    private class TranslatingSingleMethodClassVisitor extends ClassVisitor {
+
+        private final String methodName;
+        private final String methodDescriptor;
+
+        public TranslatingSingleMethodClassVisitor(final ClassWriter classWriter, String methodName, String methodDescriptor) {
+            super(Opcodes.ASM9, classWriter);
+            this.methodName = methodName;
+            this.methodDescriptor = methodDescriptor;
+        }
+
+        public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, final String[] exceptions) {
+            boolean removeExistingBridgeMethods = Boolean.parseBoolean(System.getProperty("jboss.bridger.remove_existing_bridge_methods", "false"));
+
+            final MethodVisitor defaultVisitor;
+            final String methodName = this.methodName;
+            final String methodDescriptor = this.methodDescriptor;
+
+            if (name.equals(methodName) && (methodDescriptor == null || desc.equals(methodDescriptor))) {
+                transformedMethodCount.getAndIncrement();
+                defaultVisitor = super.visitMethod(access | Opcodes.ACC_BRIDGE | Opcodes.ACC_SYNTHETIC, name, desc, signature, exceptions);
+            } else {
+                if (removeExistingBridgeMethods && (access & Opcodes.ACC_BRIDGE) != 0) {
+                    return null;
+                }
+                defaultVisitor = super.visitMethod(access, name, desc, signature, exceptions);
+            }
+            return new MethodVisitor(Opcodes.ASM9, defaultVisitor) {
+                public void visitInvokeDynamicInsn(final String name, final String desc, final Handle bsm, final Object... bsmArgs) {
+                    if (name.equals(methodName) && (methodDescriptor == null || desc.equals(methodDescriptor))) {
+                        transformedMethodCallCount.getAndIncrement();
+                    }
+                    super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
+                }
+
+                public void visitMethodInsn(final int opcode, final String owner, final String name, final String desc, final boolean itf) {
+                    if (name.equals(methodName) && (methodDescriptor == null || desc.equals(methodDescriptor))) {
+                        transformedMethodCallCount.getAndIncrement();
+                    }
+                    super.visitMethodInsn(opcode, owner, name, desc, itf);
                 }
             };
         }
