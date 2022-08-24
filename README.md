@@ -7,6 +7,11 @@ Usage: Source code
 ------------------
 In your Java source, create your bridge methods with `$$bridge` in the name.  Everything before the `$$bridge` is retained, everything including and after it is discarded.  The methods will additionally be tagged as `ACC_BRIDGE` and `ACC_SYNTHETIC`.
 
+If the bridge method name includes `$$public` after `$$bridge`, the bridge method will additionally be made `public` in the bytecode.
+Similarly, `$$protected` can be used to make the bridge method `protected`.
+This allows keeping the bridge method `private` in the source code.
+(If neither `$$public` nor `$$protected` is present in the name, the access mode of the method is left unchanged.)
+
 If you add the `@hidden` tag (available since Java 9) to the method's JavaDoc comment, it will not show up in rendered documentation for the class.
 
 Usage: Maven
