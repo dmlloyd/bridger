@@ -166,8 +166,14 @@ public final class Bridger implements ClassFileTransformer {
             final MethodVisitor defaultVisitor;
             final int idx = name.indexOf("$$bridge");
             if (idx != -1) {
+                int newAccess = access;
+                if (name.indexOf("$$public") > idx) {
+                    newAccess = Opcodes.ACC_PUBLIC;
+                } else if (name.indexOf("$$protected") > idx) {
+                    newAccess = Opcodes.ACC_PROTECTED;
+                }
                 transformedMethodCount.getAndIncrement();
-                defaultVisitor = super.visitMethod(access | Opcodes.ACC_BRIDGE | Opcodes.ACC_SYNTHETIC, name.substring(0, idx), desc, signature, exceptions);
+                defaultVisitor = super.visitMethod(newAccess | Opcodes.ACC_BRIDGE | Opcodes.ACC_SYNTHETIC, name.substring(0, idx), desc, signature, exceptions);
             } else {
                 if (removeExistingBridgeMethods && (access & Opcodes.ACC_BRIDGE) != 0)
                     return null;
