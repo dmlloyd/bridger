@@ -1,4 +1,4 @@
-name: Module Services Plugin CI
+name: Build verification
 
 on:
   push:
