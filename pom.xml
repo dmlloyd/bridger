@@ -39,7 +39,6 @@
 
     <properties>
         <!-- Dependency versions -->
-        <version.junit.junit>4.11</version.junit.junit>
         <version.org.apache.maven.maven-plugin>2.2.1</version.org.apache.maven.maven-plugin>
         <version.org.apache.maven.maven-settings>3.9.14</version.org.apache.maven.maven-settings>
         <version.org.apache.maven.plugin-api>3.9.14</version.org.apache.maven.plugin-api>
@@ -94,6 +93,7 @@
                 <version>${version.org.apache.maven.plugins.plugin}</version>
                 <configuration>
                     <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+                    <goalPrefix>bridger</goalPrefix>
                 </configuration>
                 <dependencies>
                     <dependency>
