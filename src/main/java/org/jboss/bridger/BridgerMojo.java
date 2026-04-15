@@ -40,7 +40,7 @@ import org.codehaus.plexus.util.DirectoryScanner;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-@Mojo(name = "transform", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
+@Mojo(name = "transform", defaultPhase = LifecyclePhase.PROCESS_CLASSES, threadSafe = true)
 public class BridgerMojo extends AbstractMojo {
 
     /**
