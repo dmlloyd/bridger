@@ -40,7 +40,7 @@
     <properties>
         <!-- Dependency versions -->
         <version.org.apache.maven.maven-plugin>2.2.1</version.org.apache.maven.maven-plugin>
-        <version.org.apache.maven.maven-settings>3.9.14</version.org.apache.maven.maven-settings>
+        <version.org.apache.maven.maven-settings>3.9.15</version.org.apache.maven.maven-settings>
         <version.org.apache.maven.plugin-api>3.9.14</version.org.apache.maven.plugin-api>
         <version.org.apache.maven.plugin-tools>3.15.2</version.org.apache.maven.plugin-tools>
         <version.org.apache.maven.plugins.plugin>3.15.2</version.org.apache.maven.plugins.plugin>
