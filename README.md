@@ -23,7 +23,7 @@ Add a snippet like this to your pom.xml:
             <plugin>
                 <groupId>org.jboss.bridger</groupId>
                 <artifactId>bridger</artifactId>
-                <version>1.6.Final</version>
+                <version>1.8</version>
                 <executions>
                     <!-- run after "compile", runs bridger on main classes -->
                     <execution>
