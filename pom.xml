@@ -47,7 +47,7 @@
         <version.org.apache.maven.plugin-api>3.9.16</version.org.apache.maven.plugin-api>
         <version.org.apache.maven.plugin-tools>3.15.2</version.org.apache.maven.plugin-tools>
         <version.org.apache.maven.plugins.plugin>3.15.2</version.org.apache.maven.plugins.plugin>
-        <version.org.apache.maven.plugins.site-plugin>3.21.0</version.org.apache.maven.plugins.site-plugin>
+        <version.org.apache.maven.plugins.site-plugin>3.22.0</version.org.apache.maven.plugins.site-plugin>
         <version.org.apache.maven.plugins.maven-dependency-plugin>2.6</version.org.apache.maven.plugins.maven-dependency-plugin>
         <version.org.apache.maven.shared.maven-filtering>3.5.0</version.org.apache.maven.shared.maven-filtering>
         <version.org.codehaus.plexus.plexus-utils>4.0.3</version.org.codehaus.plexus.plexus-utils>
